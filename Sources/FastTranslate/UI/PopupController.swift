@@ -8,6 +8,8 @@ final class PopupController: NSObject, NSWindowDelegate {
 
     private var panel: NSPanel?
     private var hostingView: NSHostingView<AnyView>?
+    private var globalClickMonitor: Any?
+    private var localClickMonitor: Any?
 
     private override init() {}
 
@@ -22,10 +24,11 @@ final class PopupController: NSObject, NSWindowDelegate {
     func showMessage(_ message: String) {
         hide()
         let view = MessageView(message: message) { [weak self] in self?.hide() }
-        present(rootView: AnyView(view), width: 300, height: 110, anchorBounds: nil)
+        present(rootView: AnyView(view), width: 320, height: 110, anchorBounds: nil)
     }
 
     func hide() {
+        removeDismissMonitors()
         panel?.orderOut(nil)
         hostingView = nil
     }
@@ -60,8 +63,66 @@ final class PopupController: NSObject, NSWindowDelegate {
         panel.setContentSize(NSSize(width: width, height: height))
 
         position(panel: panel, size: NSSize(width: width, height: height), anchorBounds: anchorBounds)
+        installDismissMonitors()
         panel.orderFrontRegardless()
     }
+
+    // MARK: - 自动消失（失焦 / 点击别处 / 切换页面）
+
+    private func installDismissMonitors() {
+        guard globalClickMonitor == nil, localClickMonitor == nil else { return }
+
+        // 1) 点击其他应用任意位置 → 关闭
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            DispatchQueue.main.async { self?.hide() }
+        }
+
+        // 2) 点击本应用内、弹窗外区域 → 关闭（弹窗内点击按钮不受影响）
+        localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self, let panel = self.panel else { return event }
+            if let window = event.window {
+                let screenPoint = window.convertPoint(toScreen: event.locationInWindow)
+                if !panel.frame.contains(screenPoint) {
+                    self.hide()
+                }
+            }
+            return event
+        }
+
+        // 3) 切换到其他应用（Cmd+Tab / 点击其他 App）→ 关闭
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(activeAppDidChange(_:)),
+            name: NSWorkspace.didActivateApplicationNotification,
+            object: nil
+        )
+    }
+
+    @objc private func activeAppDidChange(_ note: Notification) {
+        if let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+           app.bundleIdentifier == Bundle.main.bundleIdentifier {
+            return // 激活的是自己（如打开设置窗口），不关闭
+        }
+        hide()
+    }
+
+    private func removeDismissMonitors() {
+        if let m = globalClickMonitor {
+            NSEvent.removeMonitor(m)
+            globalClickMonitor = nil
+        }
+        if let m = localClickMonitor {
+            NSEvent.removeMonitor(m)
+            localClickMonitor = nil
+        }
+        NSWorkspace.shared.notificationCenter.removeObserver(
+            self,
+            name: NSWorkspace.didActivateApplicationNotification,
+            object: nil
+        )
+    }
+
+    // MARK: - 定位
 
     private func position(panel: NSPanel, size: NSSize, anchorBounds: CGRect?) {
         var origin: NSPoint
