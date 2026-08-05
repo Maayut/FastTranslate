@@ -5,6 +5,8 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var settingsWindow: NSWindow?
+    /// 本次运行是否已弹过授权提示（避免反复打扰）
+    private var hasPromptedForPermission = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory) // 仅菜单栏，不占 Dock
@@ -16,9 +18,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         registerHotKey()
 
-        // 首次启动若没有辅助功能权限，引导授权
+        // 监听辅助功能权限变化：一旦用户在系统设置里授权，立刻感知
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(accessibilityTrustDidChange),
+            name: NSNotification.Name("AXTrustedStatusDidChange"),
+            object: nil
+        )
+
+        // 首次启动若没有辅助功能权限，引导授权（只弹一次）
         if !AXIsProcessTrusted() {
             promptAccessibilityPermission()
+        }
+    }
+
+    @objc private func accessibilityTrustDidChange() {
+        if AXIsProcessTrusted() {
+            PopupController.shared.showMessage("辅助功能权限已开启 ✓\n选中文本后按 \(HotKeyManager.shared.currentDisplay) 即可翻译")
         }
     }
 
@@ -86,6 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if AXIsProcessTrusted() {
             PopupController.shared.showMessage("辅助功能权限已开启 ✓\n选中文本后按 \(HotKeyManager.shared.currentDisplay) 即可翻译")
         } else {
+            hasPromptedForPermission = false // 手动点击时允许再弹授权引导
             promptAccessibilityPermission()
         }
     }
@@ -99,6 +116,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - 权限
 
     private func promptAccessibilityPermission() {
+        // 本次运行已弹过模态提示就不再弹，改为轻提示，避免反复打扰
+        guard !hasPromptedForPermission else {
+            PopupController.shared.showMessage("需要辅助功能权限\n请在 系统设置 → 隐私与安全性 → 辅助功能 中勾选 FastTranslate")
+            return
+        }
+        hasPromptedForPermission = true
+
         let alert = NSAlert()
         alert.messageText = "需要辅助功能权限"
         alert.informativeText = "FastTranslate 需要「辅助功能」权限来读取你选中的文本。\n\n请点击「打开设置」，然后在 系统设置 → 隐私与安全性 → 辅助功能 中勾选 FastTranslate。\n（若未列出，先关闭再打开，或重新启动 App）"
