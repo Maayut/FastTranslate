@@ -40,7 +40,7 @@
 |------|-------------|------|
 | **Google 翻译** | 否 | 默认引擎，开箱即用（非官方接口） |
 | **DeepL** | 需要 API Key | 官方接口，翻译质量好，免费额度（[deepl.com](https://www.deepl.com) 注册） |
-| **DeepSeek** | 需要 API Key | 中文翻译质量好、成本极低（[platform.deepseek.com](https://platform.deepseek.com) 注册） |
+| **DeepSeek** | 需要 API Key | 中文翻译质量好、成本极低（[platform.deepseek.com](https://platform.deepseek.com) 注册）；可在设置中选择模型（`deepseek-chat` / `deepseek-reasoner` / 自定义）及 API Base 地址 |
 
 在菜单栏图标 → **设置** 中切换引擎并填写 API Key。
 

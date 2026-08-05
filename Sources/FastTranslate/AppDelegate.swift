@@ -86,7 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "FastTranslate 设置"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
-            window.setContentSize(NSSize(width: 440, height: 460))
+            window.setContentSize(NSSize(width: 460, height: 560))
             settingsWindow = window
         }
         NSApp.activate(ignoringOtherApps: true)

@@ -18,7 +18,9 @@ enum TranslatorFactory {
         case "deepl":
             return DeepLTranslator(apiKey: Config.deeplApiKey, freePlan: Config.deeplFreePlan)
         case "deepseek":
-            return DeepSeekTranslator(apiKey: Config.deepSeekApiKey)
+            return DeepSeekTranslator(apiKey: Config.deepSeekApiKey,
+                                      model: Config.deepSeekModel,
+                                      baseURL: Config.deepSeekBaseURL)
         default:
             return GoogleTranslator()
         }

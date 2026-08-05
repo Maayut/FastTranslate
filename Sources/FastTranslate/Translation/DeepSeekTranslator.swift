@@ -1,17 +1,25 @@
 import Foundation
 
 /// DeepSeek 翻译（OpenAI 兼容接口，中文翻译质量好、成本低，需 API Key）
+/// 模型可在设置中选择（deepseek-chat / deepseek-reasoner / 自定义）
 struct DeepSeekTranslator: Translator {
     var id = "deepseek"
     var displayName = "DeepSeek"
     var apiKey: String
+    var model: String
+    var baseURL: String
 
     func translate(_ text: String, from: String, to: String) async throws -> String {
         guard !apiKey.isEmpty else {
             throw TranslateError.missingKey("请在设置中填写 DeepSeek API Key")
         }
 
-        let url = URL(string: "https://api.deepseek.com/chat/completions")!
+        // 模型/地址留空时用默认值
+        let model = model.isEmpty ? "deepseek-chat" : model
+        let base = baseURL.isEmpty ? "https://api.deepseek.com" : baseURL
+        guard let url = URL(string: base + "/chat/completions") else {
+            throw TranslateError.parse("API Base 地址无效")
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -22,7 +30,7 @@ struct DeepSeekTranslator: Translator {
         let targetName = LangCode.displayName(to)
         let system = "你是一名专业翻译。把用户提供的文本翻译成\(targetName)。只输出译文，不要任何解释或附加内容。"
         let body: [String: Any] = [
-            "model": "deepseek-chat",
+            "model": model,
             "messages": [
                 ["role": "system", "content": system],
                 ["role": "user", "content": text],

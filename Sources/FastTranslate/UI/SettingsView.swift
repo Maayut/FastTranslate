@@ -9,6 +9,8 @@ struct SettingsView: View {
     @AppStorage("deeplApiKey") private var deeplApiKey = ""
     @AppStorage("deeplFreePlan") private var deeplFreePlan = true
     @AppStorage("deepSeekApiKey") private var deepSeekApiKey = ""
+    @AppStorage("deepSeekModel") private var deepSeekModel = "deepseek-chat"
+    @AppStorage("deepSeekBaseURL") private var deepSeekBaseURL = ""
     @AppStorage("sourceLang") private var sourceLang = "auto"
     @AppStorage("targetLang") private var targetLang = "zh"
     @AppStorage("launchAtLogin") private var launchAtLogin = false
@@ -32,6 +34,23 @@ struct SettingsView: View {
                 if engine == "deepseek" {
                     SecureField("DeepSeek API Key", text: $deepSeekApiKey)
                     Text("DeepSeek 平台：platform.deepseek.com 申请")
+                        .font(.caption).foregroundColor(.secondary)
+
+                    HStack {
+                        TextField("模型（默认 deepseek-chat）", text: $deepSeekModel)
+                        Menu {
+                            Button("deepseek-chat（通用，推荐）") { deepSeekModel = "deepseek-chat" }
+                            Button("deepseek-reasoner（推理）") { deepSeekModel = "deepseek-reasoner" }
+                        } label: {
+                            Image(systemName: "chevron.up.chevron.down")
+                        }
+                    }
+                    Text("deepseek-chat 翻译又快又便宜；reasoner 会深度思考，翻译不推荐（慢且贵）")
+                        .font(.caption).foregroundColor(.secondary)
+
+                    TextField("API Base（可选，默认 api.deepseek.com）", text: $deepSeekBaseURL)
+                        .textFieldStyle(.roundedBorder)
+                    Text("留空用官方接口；可填第三方 OpenAI 兼容中转地址")
                         .font(.caption).foregroundColor(.secondary)
                 }
             }
@@ -72,7 +91,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(width: 460, height: 480)
+        .frame(width: 460, height: 560)
     }
 
     // MARK: - 快捷键录制

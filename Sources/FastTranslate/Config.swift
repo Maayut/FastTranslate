@@ -26,6 +26,17 @@ enum Config {
         set { d.set(newValue, forKey: "deepSeekApiKey") }
     }
 
+    static var deepSeekModel: String {
+        get { d.string(forKey: "deepSeekModel") ?? "deepseek-chat" }
+        set { d.set(newValue, forKey: "deepSeekModel") }
+    }
+
+    /// 自定义 API Base（留空用默认 https://api.deepseek.com，可填第三方 OpenAI 兼容地址）
+    static var deepSeekBaseURL: String {
+        get { d.string(forKey: "deepSeekBaseURL") ?? "" }
+        set { d.set(newValue, forKey: "deepSeekBaseURL") }
+    }
+
     // 语言
     static var sourceLang: String {
         get { d.string(forKey: "sourceLang") ?? "auto" }
