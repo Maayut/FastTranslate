@@ -15,7 +15,7 @@ final class PopupController: NSObject, NSWindowDelegate {
     func show(original: String, anchorBounds: CGRect?) {
         hide()
         let view = PopupView(original: original) { [weak self] in self?.hide() }
-        present(rootView: AnyView(view), width: 400, height: 190, anchorBounds: anchorBounds)
+        present(rootView: AnyView(view), width: 400, height: 250, anchorBounds: anchorBounds)
     }
 
     /// 纯消息弹窗（如"未检测到选中文本"）
@@ -54,6 +54,7 @@ final class PopupController: NSObject, NSWindowDelegate {
         guard let panel else { return }
 
         let host = NSHostingView(rootView: rootView)
+        host.autoresizingMask = [.width, .height]
         hostingView = host
         panel.contentView = host
         panel.setContentSize(NSSize(width: width, height: height))
