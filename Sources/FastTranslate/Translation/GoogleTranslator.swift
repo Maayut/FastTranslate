@@ -24,18 +24,24 @@ struct GoogleTranslator: Translator {
             throw TranslateError.network("HTTP \((response as? HTTPURLResponse)?.statusCode ?? -1)")
         }
 
-        // 响应结构：[[["译文","原文",...],...], "原语种", ...]
-        guard let obj = try JSONSerialization.jsonObject(with: data) as? [[Any]], !obj.isEmpty else {
-            throw TranslateError.parse("响应格式异常")
-        }
-
-        var result = ""
-        if let segments = obj.first as? [[Any]] {
+        // 响应结构：[[["译文","原文",...],...], "原语种", null, 1, ...]
+        // 注意：外层数组含 null/字符串/数字，必须按 [Any] 解析
+        do {
+            let obj = try JSONSerialization.jsonObject(with: data)
+            guard let arr = obj as? [Any], !arr.isEmpty,
+                  let segments = arr.first as? [[Any]] else {
+                throw TranslateError.parse("响应格式异常")
+            }
+            var result = ""
             for segment in segments {
                 if let s = segment.first as? String { result += s }
             }
+            guard !result.isEmpty else { throw TranslateError.parse("无翻译结果") }
+            return result
+        } catch let e as TranslateError {
+            throw e
+        } catch {
+            throw TranslateError.parse("响应无法解析")
         }
-        guard !result.isEmpty else { throw TranslateError.parse("无翻译结果") }
-        return result
     }
 }

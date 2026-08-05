@@ -39,6 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "划词翻译  \(HotKeyManager.shared.currentDisplay)",
                                 action: #selector(performTranslate), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "辅助功能权限…", action: #selector(checkPermission), keyEquivalent: ""))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "退出 FastTranslate", action: #selector(quitApp), keyEquivalent: "q"))
 
@@ -79,6 +80,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func quitApp() {
         NSApp.terminate(nil)
+    }
+
+    @objc private func checkPermission() {
+        if AXIsProcessTrusted() {
+            PopupController.shared.showMessage("辅助功能权限已开启 ✓\n选中文本后按 \(HotKeyManager.shared.currentDisplay) 即可翻译")
+        } else {
+            promptAccessibilityPermission()
+        }
     }
 
     // MARK: - 快捷键
