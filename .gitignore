@@ -1,0 +1,12 @@
+# Swift 构建产物
+.build/
+.swiftpm/
+
+# App 打包产物
+Build/*.app/
+
+# macOS
+.DS_Store
+
+# 其他
+*.xcuserstate
