@@ -27,7 +27,7 @@ enum Config {
     }
 
     static var deepSeekModel: String {
-        get { d.string(forKey: "deepSeekModel") ?? "deepseek-chat" }
+        get { d.string(forKey: "deepSeekModel") ?? "deepseek-v4-flash" }
         set { d.set(newValue, forKey: "deepSeekModel") }
     }
 

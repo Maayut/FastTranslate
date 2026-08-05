@@ -9,7 +9,7 @@ struct SettingsView: View {
     @AppStorage("deeplApiKey") private var deeplApiKey = ""
     @AppStorage("deeplFreePlan") private var deeplFreePlan = true
     @AppStorage("deepSeekApiKey") private var deepSeekApiKey = ""
-    @AppStorage("deepSeekModel") private var deepSeekModel = "deepseek-chat"
+    @AppStorage("deepSeekModel") private var deepSeekModel = "deepseek-v4-flash"
     @AppStorage("deepSeekBaseURL") private var deepSeekBaseURL = ""
     @AppStorage("sourceLang") private var sourceLang = "auto"
     @AppStorage("targetLang") private var targetLang = "zh"
@@ -37,15 +37,15 @@ struct SettingsView: View {
                         .font(.caption).foregroundColor(.secondary)
 
                     HStack {
-                        TextField("模型（默认 deepseek-chat）", text: $deepSeekModel)
+                        TextField("模型（默认 deepseek-v4-flash）", text: $deepSeekModel)
                         Menu {
-                            Button("deepseek-chat（通用，推荐）") { deepSeekModel = "deepseek-chat" }
-                            Button("deepseek-reasoner（推理）") { deepSeekModel = "deepseek-reasoner" }
+                            Button("deepseek-v4-flash（推荐，快）") { deepSeekModel = "deepseek-v4-flash" }
+                            Button("deepseek-v4-pro（深度思考）") { deepSeekModel = "deepseek-v4-pro" }
                         } label: {
                             Image(systemName: "chevron.up.chevron.down")
                         }
                     }
-                    Text("deepseek-chat 翻译又快又便宜；reasoner 会深度思考，翻译不推荐（慢且贵）")
+                    Text("v4-flash 翻译快又便宜；v4-pro 会深度思考，翻译不推荐。旧模型名 deepseek-chat/reasoner 已下线")
                         .font(.caption).foregroundColor(.secondary)
 
                     TextField("API Base（可选，默认 api.deepseek.com）", text: $deepSeekBaseURL)

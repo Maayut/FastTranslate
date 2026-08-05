@@ -15,7 +15,7 @@ struct DeepSeekTranslator: Translator {
         }
 
         // 模型/地址留空时用默认值
-        let model = model.isEmpty ? "deepseek-chat" : model
+        let model = model.isEmpty ? "deepseek-v4-flash" : model
         let base = baseURL.isEmpty ? "https://api.deepseek.com" : baseURL
         guard let url = URL(string: base + "/chat/completions") else {
             throw TranslateError.parse("API Base 地址无效")
